@@ -48,35 +48,26 @@ scenarios per interval (`src/config.py`).
 | Cocycle identity `Lambda_{s,t} = Lambda_{s,u} Lambda_{u,t}` | exact | max abs gap `6.7e-16` | reproduced |
 | Restriction factorization admissible when `r = 0` | admissible (`Gamma` optimal) | `E[Z (x) Z_u|F_u] = 1.0 <= e^{-0*(t-u)} = 1.0` | reproduced |
 | Restriction factorization admissible when `r > 0` | **not** admissible (`c_{u,t} = +inf`) | `E[Z (x) Z_u|F_u] = 1.0 > e^{-r(t-u)} = 0.942` | reproduced |
-| Time-consistency `rho_{s,t}(X) = rho_{s,u}(-rho_{u,t}(X))` | exact equality | `rho_{s,t}=0.0305`, composed `=0.0454`, `rel_diff = 49%` | partially reproduced |
+| Time-consistency `rho_{s,t}(X) = rho_{s,u}(-rho_{u,t}(X))`, BSDE/feedback-optimal scenario (Proposition 4.1) | exact equality | `rho_{s,t}=0.17957`, composed `=0.17957`, `abs_diff = 0.0` | reproduced |
 
 The qualitative claims of Example 4.4 -- the shape of `G`, the exact
 cocycle identity for the density, and the suboptimality of the restriction
-factorization exactly when `r > 0` -- all hold exactly. The numerical
-time-consistency check approximates the ess-max over the (infinite-
-dimensional) admissible scenario set `D_{s,t}` by a finite sample of
-`n_scenarios` piecewise-constant scenarios drawn independently for the
-one-step quantity `rho_{s,t}(X)` and for each of the two legs of the
-two-step quantity `rho_{s,u}(-rho_{u,t}(X))`; because the three samples are
-drawn independently, the composed two-step maximum is not guaranteed to
-recover the same maximizing scenario as the one-step maximum, which is a
-finite-sample approximation gap rather than a violation of (IC). Two checks
-localize this gap. First, a sensitivity sweep at a reduced path count
-(20000 paths, `results/exp2_ambiguous_rates.json["scenario_sensitivity"]`)
-reruns the check at `n_scenarios in {100, 400, 1600}`: the absolute gap is
-`0.0145` (100 scenarios), `0.0085` (400) and `0.0098` (1600) -- it does not
-shrink monotonically with the scenario count. Second, holding
-`n_scenarios = 400` fixed and varying the path count in
-`{5000, 20000, 80000}` leaves the absolute gap essentially unchanged
-(`0.0087`, `0.0088`, `0.0087`), which rules out Monte Carlo path noise in
-the regression-based estimate of `E[.|F_u]` as the driver. Together the two
-checks identify the cause as the finite-sample bias of approximating the
-ess-sup independently by a maximum over `n_scenarios` draws in the one-step
-formula versus the nested two-step formula, rather than Monte Carlo noise
-in the number of simulated paths; the precise split of that bias between
-the two legs of the two-step formula was not isolated further. The
-restriction/products and conjugate-`G` checks above use closed-form or
-exact-cocycle quantities and are unaffected by this approximation.
+factorization exactly when `r > 0` -- all hold exactly. Since the driver
+`g(v,y,z) = Ry^- - ry^+ + nu|z|` is explicit, `rho_{s,t}(X)` is obtained as
+the BSDE solution driven by the pointwise (feedback) maximizer
+`beta*(y) = R` if `y<0` else `r`, `q*(z) = nu sign(z)` of
+`G(v,beta,q) = sup_{y,z}{-beta y + q.z - g(v,y,z)}`, computed by backward
+induction on the simulated paths (`src/bsde_solver.py`); this is the
+construction used by Proposition 4.1 and attains the ess-max exactly,
+unlike a finite sample of independently drawn admissible scenarios.
+`results/exp2_ambiguous_rates.json["time_consistency_naive_scenarios"]`
+also reports that simpler diagnostic, which draws `n_scenarios`
+piecewise-constant admissible scenarios independently for `rho_{s,t}(X)`
+and for each leg of `rho_{s,u}(-rho_{u,t}(X))`: it underestimates the
+ess-max of the worst-case risk measure (`rho_{s,t}=0.0305` vs the BSDE
+value `0.1796`) and the two composed legs do not recover the same
+maximizing scenario, so it is reported only as a lower-bound diagnostic
+and is not used to judge time-consistency.
 
 ## Experiment 3 -- Penalized interest rates (Example 4.5)
 
@@ -134,14 +125,18 @@ agreement once the regression-Monte-Carlo BSDE solver has converged.
   with a comment on their origin) were made by the implementer and are not
   claims of the paper.
 * Experiment 2's worst-case risk measure `rho_{s,t}(X) = ess max_{Z in
-  D_{s,t}} E[-ZX|F_s]` is approximated by a finite sample of piecewise-constant
-  admissible scenarios rather than an exact supremum over the
-  infinite-dimensional predictable set `U`; this finite-sample approximation
-  is the cause of the partially-reproduced time-consistency check above. A
-  sensitivity sweep (described in that section) rules out the scenario
-  sample size alone as the driver of the gap, but does not fully decompose
-  it from the Monte-Carlo path noise in the `F_u`-conditional-expectation
-  regression, so the exact share of each source is not identified.
+  D_{s,t}} E[-ZX|F_s]` is evaluated two ways. The time-consistency check
+  reported above uses the feedback-optimal scenario of `G`'s maximizer
+  (equivalent to solving the associated BSDE, Proposition 4.1), which
+  attains the ess-max exactly and reproduces time-consistency to machine
+  precision. A simpler diagnostic that approximates the ess-max by a
+  finite sample of independently drawn piecewise-constant admissible
+  scenarios is also reported
+  (`results/exp2_ambiguous_rates.json["time_consistency_naive_scenarios"]`
+  and `["scenario_sensitivity"]`) for comparison; it underestimates the
+  risk measure and its two composed legs do not recover the same
+  maximizing scenario, which is a finite-sample artifact of that
+  diagnostic and not evidence against (IC).
 * Experiment 4 uses the driver of Example 4.4 (rather than a novel driver)
   because the paper gives closed-form conjugates only for the drivers of
   Examples 4.4 and 4.5, which is what allows the BSDE solution to be checked

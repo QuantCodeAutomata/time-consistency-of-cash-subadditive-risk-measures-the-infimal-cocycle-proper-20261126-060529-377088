@@ -39,6 +39,7 @@ EXP2_N_PATHS = 100_000  # Monte Carlo paths; not specified in the paper (task su
 EXP2_N_SCENARIOS = 400  # number of (beta, q) scenarios sampled from U to approximate the ess max in (4.1)/Example 4.4; not specified in the paper
 EXP2_SEED = 2  # RNG seed
 EXP2_LARGE_PENALTY_CAP = 1.0e10  # numerical stand-in for +infinity
+EXP2_REGRESSION_DEGREE = 5  # polynomial degree of the Longstaff-Schwartz-style basis for the BSDE-based time-consistency check (Proposition 4.1); not specified in the paper
 
 # ---------------------------------------------------------------------------
 # Experiment 3 -- Example 4.5, penalized interest rates

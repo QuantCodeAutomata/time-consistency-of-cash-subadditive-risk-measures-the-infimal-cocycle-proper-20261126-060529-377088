@@ -120,23 +120,31 @@ def worst_case_rho(
 
     Returns
     -------
-    (values, argmax_index): the path-wise maximized value (ess max) and the
-    index of the maximizing scenario (by mean, since F_s is trivial here).
+    (values, argmax_index): the path-wise ess-max value and the index of the
+    scenario that is best on average (reported for diagnostics only).
+
+    Notes
+    -----
+    ``ess max_Z E[-ZX|F_s]`` is a pointwise (F_s-measurable) supremum: when
+    F_s is non-trivial, different realizations of the conditioning variable
+    can be maximized by different scenarios, so the ess-max must be computed
+    as the elementwise maximum, over scenarios, of each scenario's regressed
+    conditional-expectation curve -- not as the curve of a single globally
+    "best on average" scenario. When F_s is trivial (``conditioning is
+    None``), ``regress_conditional_expectation`` already collapses every
+    curve to its scalar sample mean, so the elementwise maximum coincides
+    with the scalar argmax of the means.
     """
-    objective_means = np.empty(terminal_densities.shape[0])
-    for k, z_terminal in enumerate(terminal_densities):
-        ez = regress_conditional_expectation(
-            conditioning if conditioning is not None else np.zeros((len(x_values), 0)),
-            -z_terminal * x_values,
-            degree,
-        )
-        objective_means[k] = np.mean(ez)
-    best = int(np.argmax(objective_means))
-    best_value = regress_conditional_expectation(
-        conditioning if conditioning is not None else np.zeros((len(x_values), 0)),
-        -terminal_densities[best] * x_values,
-        degree,
+    conditioning_arg = (
+        conditioning if conditioning is not None else np.zeros((len(x_values), 0))
     )
+    all_curves = np.empty((terminal_densities.shape[0], len(x_values)))
+    for k, z_terminal in enumerate(terminal_densities):
+        all_curves[k] = regress_conditional_expectation(
+            conditioning_arg, -z_terminal * x_values, degree
+        )
+    best = int(np.argmax(all_curves.mean(axis=1)))
+    best_value = np.max(all_curves, axis=0)
     return best_value, best
 
 

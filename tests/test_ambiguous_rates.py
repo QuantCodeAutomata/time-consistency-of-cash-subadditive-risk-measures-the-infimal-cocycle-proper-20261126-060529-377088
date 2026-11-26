@@ -55,6 +55,31 @@ def test_worst_case_rho_selects_the_maximizing_scenario():
     assert idx == int(np.argmax(expected))
 
 
+def test_worst_case_rho_is_pointwise_not_a_single_global_scenario():
+    """ess max_Z E[-ZX|F_u] must pick, at each value of the conditioning
+    variable, whichever scenario is best there -- not one scenario that is
+    merely best on average (paper Example 4.4, dual formula (4.1))."""
+    rng = np.random.default_rng(0)
+    n = 20_000
+    # Binary conditioning variable: a degree-1 polynomial fits two distinct
+    # values exactly, so the regression step introduces no bias here and the
+    # test isolates the pointwise-vs-global selection logic.
+    sign = rng.choice([-1.0, 1.0], size=n)
+    x_values = np.ones(n)  # X = 1 (deterministic), so -Z*X = -Z
+
+    # Scenario A: Z = 1 - 0.3*sign(w_u) -> -Z is large (good) only when sign = +1.
+    # Scenario B: Z = 1 + 0.3*sign(w_u) -> -Z is large (good) only when sign = -1.
+    densities = np.array([1.0 - 0.3 * sign, 1.0 + 0.3 * sign])
+
+    values, _ = worst_case_rho(x_values, densities, conditioning=sign, degree=1)
+    # The true pointwise ess-max of {-Z_A, -Z_B} is -min(Z_A, Z_B) = -0.7 everywhere.
+    assert np.allclose(values, -0.7, atol=0.05)
+    # A single globally-best scenario could reach at best -1.0 (mean of -Z_A or -Z_B
+    # is -1.0 for both, since E[sign(w_u)] = 0), far from the true pointwise optimum.
+    single_scenario_curve = np.mean(-densities, axis=1)
+    assert np.max(single_scenario_curve) < np.mean(values) - 0.1
+
+
 def test_restriction_vs_products_check_runs_and_cocycle_identity_holds():
     rng = np.random.default_rng(1)
     out = restriction_vs_products_check(

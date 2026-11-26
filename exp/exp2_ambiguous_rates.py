@@ -32,6 +32,7 @@ from src.ambiguous_rates import (
     sample_admissible_scenario,
     worst_case_rho,
 )
+from src.bsde_solver import verify_time_consistency_bsde
 
 RESULTS_DIR = Path(__file__).resolve().parent.parent / "results"
 
@@ -60,8 +61,20 @@ def compute_time_consistency(
     r: float, upper_r: float, nu: float, dim: int,
     s: float, u: float, t: float, n_steps: int,
 ) -> dict:
-    """rho_{s,t}(X) vs rho_{s,u}(-rho_{u,t}(X)) over a finite admissible-scenario
-    sample of the worst-case risk measure of Example 4.4 (dual formula (4.1))."""
+    """Naive-scenario diagnostic: rho_{s,t}(X) vs rho_{s,u}(-rho_{u,t}(X)) with
+    the ess max in the dual formula (4.1) approximated by the max over a finite
+    sample of *randomly drawn* admissible (beta, q) processes.
+
+    The true ess max over D_{s,t} is attained only at the feedback-optimal
+    (bang-bang) scenario beta*(y) = R*1{y<0} + r*1{y>=0}, q*(z) = nu*sign(z)
+    of Proposition 4.1 (see src.bsde_solver.feedback_optimal_scenario); a
+    finite sample of randomly drawn scenarios has essentially zero probability
+    of approximating this bang-bang path well, so this diagnostic
+    systematically *underestimates* rho_{s,t}(X), by an amount that need not
+    shrink monotonically with n_scenarios or n_paths. It is kept here only to
+    document that effect (see `scenario_sensitivity` below); the authoritative
+    time-consistency check is `compute_time_consistency_bsde`, which uses the
+    feedback-optimal scenario shared with Experiment 4."""
     rng = np.random.default_rng(seed)
     grid = np.linspace(s, t, n_steps + 1)
     paths = simulate_brownian_paths(grid, n_paths, dim=dim, seed=seed)
@@ -112,6 +125,28 @@ def compute_time_consistency(
     }
 
 
+def compute_time_consistency_bsde(
+    seed: int, n_paths: int, r: float, upper_r: float, nu: float,
+    s: float, u: float, t: float, n_steps: int, degree: int,
+) -> dict:
+    """Authoritative time-consistency check (Proposition 4.1 / dual formula (4.1)).
+
+    Uses the feedback-optimal scenario attaining the ess max in rho_{s,t}(X) =
+    ess max_{Z in D_{s,t}} E[-ZX|F_s], obtained by solving the BSDE with the
+    Example 4.4 driver g(v,y,z) = R*y^- - r*y^+ + nu*|z| (src.bsde_solver,
+    shared with Experiment 4), rather than by maximizing over a finite sample
+    of randomly drawn admissible scenarios (see `compute_time_consistency`).
+    """
+    grid = np.linspace(s, t, n_steps + 1)
+    paths = simulate_brownian_paths(grid, n_paths, dim=1, seed=seed)
+    dw = brownian_increments(grid, paths)
+    u_index = int(np.argmin(np.abs(grid - u)))
+    x_values = np.tanh(paths[:, -1, :].sum(axis=1))
+    return verify_time_consistency_bsde(
+        x_values, grid, paths, dw, r, upper_r, nu, u_index, degree
+    )
+
+
 def run(seed: int = config.EXP2_SEED) -> dict:
     r, upper_r, nu = config.EXP2_R, config.EXP2_R_UPPER, config.EXP2_NU
     dim = config.EXP2_DIM
@@ -123,11 +158,14 @@ def run(seed: int = config.EXP2_SEED) -> dict:
     time_consistency = compute_time_consistency(
         seed, n_paths, n_scenarios, r, upper_r, nu, dim, s, u, t, n_steps
     )
+    time_consistency_bsde = compute_time_consistency_bsde(
+        seed, n_paths, r, upper_r, nu, s, u, t, n_steps, config.EXP2_REGRESSION_DEGREE
+    )
 
-    # Scenario-sampling sensitivity: the finite sample of admissible scenarios
-    # used to approximate the ess-max in (4.1) is the only approximation in this
-    # experiment, so the abs_diff above should shrink as n_scenarios grows (at a
-    # reduced path count, to keep the sweep cheap).
+    # Scenario-sampling sensitivity: with randomly drawn admissible scenarios,
+    # the ess-max in (4.1) is approximated only by chance, never exactly (see
+    # compute_time_consistency's docstring), so the abs_diff above need not
+    # shrink monotonically as n_scenarios grows; this sweep documents that.
     sensitivity_n_paths = max(2_000, n_paths // 5)
     sensitivity_scenarios = sorted({max(50, n_scenarios // 4), n_scenarios, n_scenarios * 4})
     scenario_sensitivity = [
@@ -155,7 +193,8 @@ def run(seed: int = config.EXP2_SEED) -> dict:
             "n_scenarios": n_scenarios, "seed": seed,
         },
         "conjugate_G_table": conjugate_table,
-        "time_consistency": time_consistency,
+        "time_consistency_naive_scenarios": time_consistency,
+        "time_consistency_bsde": time_consistency_bsde,
         "scenario_sensitivity": scenario_sensitivity,
         "restriction_vs_products_r_gt_0": products_check,
         "restriction_vs_products_r_eq_0": products_check_r_zero,
@@ -173,7 +212,12 @@ def run(seed: int = config.EXP2_SEED) -> dict:
     assert not mismatches, (
         f"conjugate_G must be finite (=0) exactly on the admissible corridor: {mismatches}"
     )
-    assert time_consistency["abs_diff"] < 0.1, f"time-consistency failed: {time_consistency}"
+    # The authoritative check uses the feedback-optimal scenario (Proposition 4.1);
+    # the naive random-scenario diagnostic is reported but not asserted, since it
+    # systematically underestimates rho_{s,t}(X) (see compute_time_consistency).
+    assert time_consistency_bsde["abs_diff"] < 0.1, (
+        f"time-consistency failed: {time_consistency_bsde}"
+    )
     assert products_check["cocycle_identity_max_abs_gap"] < 1e-8, "cocycle identity Lambda_st=Lambda_su*Lambda_ut failed"
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
