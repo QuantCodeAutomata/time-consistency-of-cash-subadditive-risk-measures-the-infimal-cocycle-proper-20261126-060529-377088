@@ -22,7 +22,7 @@ EXP1_T = 1.0  # terminal time t (years); not prescribed by the paper
 EXP1_N_PATHS = 200_000  # Monte Carlo paths; not specified in the paper
 EXP1_SEED = 1  # RNG seed, for reproducibility only
 EXP1_REGRESSION_DEGREE = 4  # polynomial degree used to estimate E[.|F_s] when s>0 (not specified in the paper)
-EXP1_LARGE_PENALTY_CAP = 1.0e10  # numerical stand-in for +infinity penalties, as suggested by the task's implementation notes
+EXP1_LARGE_PENALTY_CAP = 1.0e10  # finite numerical stand-in for the +infinity penalty of Remark 3.9
 
 # ---------------------------------------------------------------------------
 # Experiment 2 -- Example 4.4, ambiguous interest-rate corridor

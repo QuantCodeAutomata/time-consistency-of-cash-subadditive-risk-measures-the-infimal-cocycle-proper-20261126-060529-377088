@@ -149,5 +149,5 @@ agreement once the regression-Monte-Carlo BSDE solver has converged.
 
 ## Not reproduced
 
-There is nothing to report: all four selected experiments were run to
+There is nothing to report: all four experiments were run to
 completion and every stated expected outcome was checked.
