@@ -1,0 +1,89 @@
+{
+  "parameters": {
+    "r": 0.1,
+    "upper_r": 0.3,
+    "nu": 0.3,
+    "dim": 1,
+    "s": 0.0,
+    "u": 0.4,
+    "t": 1.0,
+    "n_steps": 60,
+    "n_paths": 100000,
+    "n_scenarios": 400,
+    "seed": 2
+  },
+  "conjugate_G_table": [
+    {
+      "beta": 0.1,
+      "q": 0.0,
+      "G": 0.0,
+      "G_is_infinite": false,
+      "expected_admissible": true,
+      "matches_expectation": true
+    },
+    {
+      "beta": 0.3,
+      "q": 0.0,
+      "G": 0.0,
+      "G_is_infinite": false,
+      "expected_admissible": true,
+      "matches_expectation": true
+    },
+    {
+      "beta": 0.2,
+      "q": 0.15,
+      "G": 0.0,
+      "G_is_infinite": false,
+      "expected_admissible": true,
+      "matches_expectation": true
+    },
+    {
+      "beta": 0.05,
+      "q": 0.0,
+      "G": null,
+      "G_is_infinite": true,
+      "expected_admissible": false,
+      "matches_expectation": true
+    },
+    {
+      "beta": 0.35,
+      "q": 0.0,
+      "G": null,
+      "G_is_infinite": true,
+      "expected_admissible": false,
+      "matches_expectation": true
+    },
+    {
+      "beta": 0.1,
+      "q": 0.35,
+      "G": null,
+      "G_is_infinite": true,
+      "expected_admissible": false,
+      "matches_expectation": true
+    }
+  ],
+  "time_consistency": {
+    "rho_s_t": 0.03053054418205419,
+    "rho_s_u_of_minus_rho_u_t": 0.045391280271890426,
+    "abs_diff": 0.014860736089836235,
+    "rel_diff": 0.48674979395130974
+  },
+  "restriction_vs_products_r_gt_0": {
+    "cocycle_identity_max_abs_gap": 6.661338147750939e-16,
+    "restriction_conditional_expectation_mean": 0.9999999665083634,
+    "theoretical_bound_e_minus_r_t_minus_u": 0.9417645335842487,
+    "empirical_max_E_Z2_given_Fu_over_scenarios": 0.8998263331078653,
+    "restriction_is_admissible": false,
+    "r": 0.1
+  },
+  "restriction_vs_products_r_eq_0": {
+    "cocycle_identity_max_abs_gap": 6.661338147750939e-16,
+    "restriction_conditional_expectation_mean": 0.9999999941949576,
+    "theoretical_bound_e_minus_r_t_minus_u": 1.0,
+    "empirical_max_E_Z2_given_Fu_over_scenarios": 0.9295791106632662,
+    "restriction_is_admissible": true,
+    "r": 0.0
+  },
+  "restriction_suboptimal_when_r_positive": true,
+  "restriction_admissible_when_r_zero": true
+}

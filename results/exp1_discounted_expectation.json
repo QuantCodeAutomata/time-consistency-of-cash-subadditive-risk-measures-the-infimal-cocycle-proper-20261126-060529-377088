@@ -1,0 +1,45 @@
+{
+  "parameters": {
+    "r": 0.05,
+    "s": 0.0,
+    "u": 0.6,
+    "t": 1.0,
+    "n_paths": 200000,
+    "seed": 1,
+    "regression_degree": 4
+  },
+  "discount_factor_z_star": 0.951229424500714,
+  "penalty_at_z_star": 0.0,
+  "penalty_at_z_equal_1": 10000000000.0,
+  "penalty_at_z_equal_1_is_infinite": true,
+  "time_consistency": {
+    "constant_1": {
+      "rho_s_t": -0.9512294245007135,
+      "rho_s_u_of_minus_rho_u_t": -0.9512294245007086,
+      "abs_diff": 4.884981308350689e-15,
+      "rel_diff": 5.1354396558062156e-15
+    },
+    "tanh_Wt": {
+      "rho_s_t": 0.0019989865452149096,
+      "rho_s_u_of_minus_rho_u_t": 0.0019989865452150705,
+      "abs_diff": 1.6089560239684886e-16,
+      "rel_diff": 8.04885869702295e-14
+    },
+    "indicator_Wt_gt_0": {
+      "rho_s_t": -0.47500592541867637,
+      "rho_s_u_of_minus_rho_u_t": -0.47500592541867437,
+      "abs_diff": 1.9984014443252818e-15,
+      "rel_diff": 4.20710845357111e-15
+    }
+  },
+  "restriction_factorization": {
+    "gamma": 10000000000.0,
+    "gamma_is_infinite": true
+  },
+  "proportional_factorization": {
+    "gamma": 0.0,
+    "gamma_is_infinite": false
+  },
+  "ic_infimum_matches_c_st": true,
+  "restriction_is_suboptimal": true
+}

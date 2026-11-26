@@ -1,0 +1,37 @@
+{
+  "parameters": {
+    "r": 0.1,
+    "upper_r": 0.3,
+    "nu": 0.3,
+    "s": 0.0,
+    "u": 0.5,
+    "t": 1.0,
+    "n_steps": 100,
+    "n_paths": 100000,
+    "degree": 5,
+    "seed": 4
+  },
+  "dual_representation_check": {
+    "bsde_Y0_mean": 0.17992909281631758,
+    "dual_scenario_value_mean": 0.17911632577585074,
+    "abs_diff": 0.0008127670404668441,
+    "rel_diff": 0.00451715188325084
+  },
+  "time_consistency_check": {
+    "rho_s_t": 0.17992909281631758,
+    "rho_s_u_of_minus_rho_u_t": 0.17992909281631758,
+    "abs_diff": 0.0,
+    "rel_diff": 0.0
+  },
+  "scenario_cocycle_check_4_2": {
+    "c_s_t": 0.0,
+    "c_s_u": 0.0,
+    "lambda_s_u": 0.9312145319268578,
+    "c_u_t": 0.0,
+    "rhs_c_su_plus_lambda_c_ut": 0.0,
+    "abs_gap": 0.0,
+    "all_penalties_zero": true
+  },
+  "infimal_cocycle_ic_gap_at_optimal_factorization": 0.0,
+  "proposition_4_1_holds": true
+}

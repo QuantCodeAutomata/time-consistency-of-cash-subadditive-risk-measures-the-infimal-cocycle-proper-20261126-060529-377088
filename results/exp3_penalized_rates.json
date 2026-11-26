@@ -1,0 +1,83 @@
+{
+  "parameters": {
+    "theta": 1.0,
+    "upper_r": 0.1,
+    "s": 0.0,
+    "u": 0.5,
+    "t": 1.0,
+    "z": 0.95,
+    "admissibility_bound": 0.9070294784580498
+  },
+  "minimal_penalty_c_st": 0.001282262076414443,
+  "ic_verification_at_optimum": {
+    "z1_optimal_intermediate": 0.974839717240448,
+    "z2": 0.9745191780749725,
+    "c_su": 0.0006411310382072272,
+    "c_ut": 0.0006576784130442593,
+    "c_su_plus_z1_c_ut": 0.0012822620764144396,
+    "c_st": 0.001282262076414443,
+    "abs_gap": 3.469446951953614e-18
+  },
+  "restriction_factorization_gamma": 0.002564524152828886,
+  "constant_rate_factorization_gamma": 0.0012823147880034005,
+  "optimal_z1": 0.974839717240448,
+  "constant_rate_z1": 0.9746794344808963,
+  "restriction_z1": 0.95,
+  "ordering_z_lt_const_lt_opt_lt_1": true,
+  "optimal_rate_at_t": 0.05195670417030831,
+  "optimal_rate_admissible": true,
+  "restriction_strictly_worse": true,
+  "constant_rate_strictly_worse": true,
+  "z_grid_comparison": [
+    {
+      "z": 0.91,
+      "c_st": 0.004243194332217402,
+      "gamma_restriction": 0.008486388664434803,
+      "gamma_constant_rate": 0.004243783982429794,
+      "z1_optimal": 0.9544696007084729,
+      "z1_restriction": 0.91,
+      "z1_constant_rate": 0.9539392014169457,
+      "ordering_holds": true
+    },
+    {
+      "z": 0.93,
+      "c_st": 0.0025396956028179932,
+      "gamma_restriction": 0.0050793912056359865,
+      "gamma_constant_rate": 0.0025399045807402813,
+      "z1_optimal": 0.9646825380496479,
+      "z1_restriction": 0.93,
+      "z1_constant_rate": 0.9643650760992956,
+      "ordering_holds": true
+    },
+    {
+      "z": 0.95,
+      "c_st": 0.001282262076414443,
+      "gamma_restriction": 0.002564524152828886,
+      "gamma_constant_rate": 0.0012823147880034005,
+      "z1_optimal": 0.974839717240448,
+      "z1_restriction": 0.95,
+      "z1_constant_rate": 0.9746794344808963,
+      "ordering_holds": true
+    },
+    {
+      "z": 0.97,
+      "c_st": 0.00045687928155811074,
+      "gamma_restriction": 0.0009137585631162215,
+      "gamma_constant_rate": 0.000456885904554099,
+      "z1_optimal": 0.9849428900898053,
+      "z1_restriction": 0.97,
+      "z1_constant_rate": 0.9848857801796105,
+      "ordering_holds": true
+    },
+    {
+      "z": 0.99,
+      "c_st": 5.0251573520180854e-05,
+      "gamma_restriction": 0.00010050314704036171,
+      "gamma_constant_rate": 5.0251652830624754e-05,
+      "z1_optimal": 0.9949937185533099,
+      "z1_restriction": 0.99,
+      "z1_constant_rate": 0.99498743710662,
+      "ordering_holds": true
+    }
+  ]
+}
