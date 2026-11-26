@@ -55,22 +55,28 @@ cocycle identity for the density, and the suboptimality of the restriction
 factorization exactly when `r > 0` -- all hold exactly. The numerical
 time-consistency check approximates the ess-max over the (infinite-
 dimensional) admissible scenario set `D_{s,t}` by a finite sample of
-piecewise-constant scenarios drawn independently on `[s,t]`, `[s,u]` and
-`[u,t]`; because the three samples are drawn independently, the composed
-two-step maximum is not guaranteed to recover the same maximizing scenario
-as the one-step maximum, which is a finite-sample approximation gap rather
-than a violation of (IC). A sensitivity sweep at a reduced path count
+`n_scenarios` piecewise-constant scenarios drawn independently for the
+one-step quantity `rho_{s,t}(X)` and for each of the two legs of the
+two-step quantity `rho_{s,u}(-rho_{u,t}(X))`; because the three samples are
+drawn independently, the composed two-step maximum is not guaranteed to
+recover the same maximizing scenario as the one-step maximum, which is a
+finite-sample approximation gap rather than a violation of (IC). Two checks
+localize this gap. First, a sensitivity sweep at a reduced path count
 (20000 paths, `results/exp2_ambiguous_rates.json["scenario_sensitivity"]`)
 reruns the check at `n_scenarios in {100, 400, 1600}`: the absolute gap is
 `0.0145` (100 scenarios), `0.0085` (400) and `0.0098` (1600) -- it does not
-shrink monotonically with the scenario count. This localizes the gap only
-partially: it rules out the scenario sample size as the sole driver of the
-49% rel_diff, and points instead to Monte Carlo path noise in the
-regression-based estimate of `E[.|F_u]` (used for `rho_{u,t}(X)`) as a
-further contributor, but the exact decomposition between the two sources of
-noise was not isolated further. The restriction/products and conjugate-`G`
-checks above use closed-form or exact-cocycle quantities and are unaffected
-by this approximation.
+shrink monotonically with the scenario count. Second, holding
+`n_scenarios = 400` fixed and varying the path count in
+`{5000, 20000, 80000}` leaves the absolute gap essentially unchanged
+(`0.0087`, `0.0088`, `0.0087`), which rules out Monte Carlo path noise in
+the regression-based estimate of `E[.|F_u]` as the driver. Together the two
+checks identify the cause as the finite-sample bias of approximating the
+ess-sup independently by a maximum over `n_scenarios` draws in the one-step
+formula versus the nested two-step formula, rather than Monte Carlo noise
+in the number of simulated paths; the precise split of that bias between
+the two legs of the two-step formula was not isolated further. The
+restriction/products and conjugate-`G` checks above use closed-form or
+exact-cocycle quantities and are unaffected by this approximation.
 
 ## Experiment 3 -- Penalized interest rates (Example 4.5)
 
@@ -130,9 +136,12 @@ agreement once the regression-Monte-Carlo BSDE solver has converged.
 * Experiment 2's worst-case risk measure `rho_{s,t}(X) = ess max_{Z in
   D_{s,t}} E[-ZX|F_s]` is approximated by a finite sample of piecewise-constant
   admissible scenarios rather than an exact supremum over the
-  infinite-dimensional predictable set `U`; this is the cause of the
-  partially-reproduced time-consistency check above, confirmed by the
-  sensitivity check described in that section.
+  infinite-dimensional predictable set `U`; this finite-sample approximation
+  is the cause of the partially-reproduced time-consistency check above. A
+  sensitivity sweep (described in that section) rules out the scenario
+  sample size alone as the driver of the gap, but does not fully decompose
+  it from the Monte-Carlo path noise in the `F_u`-conditional-expectation
+  regression, so the exact share of each source is not identified.
 * Experiment 4 uses the driver of Example 4.4 (rather than a novel driver)
   because the paper gives closed-form conjugates only for the drivers of
   Examples 4.4 and 4.5, which is what allows the BSDE solution to be checked
