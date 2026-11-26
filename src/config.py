@@ -35,7 +35,7 @@ EXP2_S = 0.0  # evaluation time s (years)
 EXP2_U = 0.4  # intermediate time u (years), 0 <= s < u < t
 EXP2_T = 1.0  # terminal time t (years)
 EXP2_N_STEPS = 60  # number of time steps on [s, t] for the piecewise-constant scenario processes; not specified in the paper
-EXP2_N_PATHS = 100_000  # Monte Carlo paths; not specified in the paper (task suggests N >= 100000)
+EXP2_N_PATHS = 100_000  # Monte Carlo paths; not specified in the paper
 EXP2_N_SCENARIOS = 400  # number of (beta, q) scenarios sampled from U to approximate the ess max in (4.1)/Example 4.4; not specified in the paper
 EXP2_SEED = 2  # RNG seed
 EXP2_LARGE_PENALTY_CAP = 1.0e10  # numerical stand-in for +infinity
