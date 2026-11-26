@@ -54,16 +54,23 @@ The qualitative claims of Example 4.4 -- the shape of `G`, the exact
 cocycle identity for the density, and the suboptimality of the restriction
 factorization exactly when `r > 0` -- all hold exactly. The numerical
 time-consistency check approximates the ess-max over the (infinite-
-dimensional) admissible scenario set `D_{s,t}` by a finite sample of 400
+dimensional) admissible scenario set `D_{s,t}` by a finite sample of
 piecewise-constant scenarios drawn independently on `[s,t]`, `[s,u]` and
 `[u,t]`; because the three samples are drawn independently, the composed
 two-step maximum is not guaranteed to recover the same maximizing scenario
 as the one-step maximum, which is a finite-sample approximation gap rather
-than a violation of (IC). A sensitivity check on a reduced path count
-(20000 paths) shows the gap shrinking as the scenario sample grows
-(`abs_diff = 0.0157` at 400 scenarios, `0.0128` at 2000 scenarios), consistent
-with this being scenario-sampling noise that vanishes as the admissible set
-is resolved more finely, rather than a formula error.
+than a violation of (IC). A sensitivity sweep at a reduced path count
+(20000 paths, `results/exp2_ambiguous_rates.json["scenario_sensitivity"]`)
+reruns the check at `n_scenarios in {100, 400, 1600}`: the absolute gap is
+`0.0145` (100 scenarios), `0.0085` (400) and `0.0098` (1600) -- it does not
+shrink monotonically with the scenario count. This localizes the gap only
+partially: it rules out the scenario sample size as the sole driver of the
+49% rel_diff, and points instead to Monte Carlo path noise in the
+regression-based estimate of `E[.|F_u]` (used for `rho_{u,t}(X)`) as a
+further contributor, but the exact decomposition between the two sources of
+noise was not isolated further. The restriction/products and conjugate-`G`
+checks above use closed-form or exact-cocycle quantities and are unaffected
+by this approximation.
 
 ## Experiment 3 -- Penalized interest rates (Example 4.5)
 

@@ -55,14 +55,13 @@ def check_conjugate_G(r: float, upper_r: float, nu: float) -> list[dict]:
     return rows
 
 
-def run(seed: int = config.EXP2_SEED) -> dict:
-    r, upper_r, nu = config.EXP2_R, config.EXP2_R_UPPER, config.EXP2_NU
-    dim = config.EXP2_DIM
-    s, u, t = config.EXP2_S, config.EXP2_U, config.EXP2_T
-    n_steps, n_paths = config.EXP2_N_STEPS, config.EXP2_N_PATHS
-    n_scenarios = config.EXP2_N_SCENARIOS
-    cap = config.EXP2_LARGE_PENALTY_CAP
-
+def compute_time_consistency(
+    seed: int, n_paths: int, n_scenarios: int,
+    r: float, upper_r: float, nu: float, dim: int,
+    s: float, u: float, t: float, n_steps: int,
+) -> dict:
+    """rho_{s,t}(X) vs rho_{s,u}(-rho_{u,t}(X)) over a finite admissible-scenario
+    sample of the worst-case risk measure of Example 4.4 (dual formula (4.1))."""
     rng = np.random.default_rng(seed)
     grid = np.linspace(s, t, n_steps + 1)
     paths = simulate_brownian_paths(grid, n_paths, dim=dim, seed=seed)
@@ -103,15 +102,45 @@ def run(seed: int = config.EXP2_SEED) -> dict:
     )
     rho_s_u_of_minus = float(np.mean(rho_s_u_of_minus_values))
 
-    time_consistency = {
+    return {
+        "n_paths": n_paths,
+        "n_scenarios": n_scenarios,
         "rho_s_t": rho_s_t,
         "rho_s_u_of_minus_rho_u_t": rho_s_u_of_minus,
         "abs_diff": abs(rho_s_t - rho_s_u_of_minus),
         "rel_diff": abs(rho_s_t - rho_s_u_of_minus) / max(abs(rho_s_t), 1e-8),
     }
 
+
+def run(seed: int = config.EXP2_SEED) -> dict:
+    r, upper_r, nu = config.EXP2_R, config.EXP2_R_UPPER, config.EXP2_NU
+    dim = config.EXP2_DIM
+    s, u, t = config.EXP2_S, config.EXP2_U, config.EXP2_T
+    n_steps, n_paths = config.EXP2_N_STEPS, config.EXP2_N_PATHS
+    n_scenarios = config.EXP2_N_SCENARIOS
+    cap = config.EXP2_LARGE_PENALTY_CAP
+
+    time_consistency = compute_time_consistency(
+        seed, n_paths, n_scenarios, r, upper_r, nu, dim, s, u, t, n_steps
+    )
+
+    # Scenario-sampling sensitivity: the finite sample of admissible scenarios
+    # used to approximate the ess-max in (4.1) is the only approximation in this
+    # experiment, so the abs_diff above should shrink as n_scenarios grows (at a
+    # reduced path count, to keep the sweep cheap).
+    sensitivity_n_paths = max(2_000, n_paths // 5)
+    sensitivity_scenarios = sorted({max(50, n_scenarios // 4), n_scenarios, n_scenarios * 4})
+    scenario_sensitivity = [
+        compute_time_consistency(
+            seed + 100 + k, sensitivity_n_paths, n_sc,
+            r, upper_r, nu, dim, s, u, t, n_steps,
+        )
+        for k, n_sc in enumerate(sensitivity_scenarios)
+    ]
+
     conjugate_table = check_conjugate_G(r, upper_r, nu)
 
+    rng = np.random.default_rng(seed)
     products_check = restriction_vs_products_check(
         rng, r, upper_r, nu, dim, s, u, t, n_steps, n_paths, seed=seed + 1
     )
@@ -127,6 +156,7 @@ def run(seed: int = config.EXP2_SEED) -> dict:
         },
         "conjugate_G_table": conjugate_table,
         "time_consistency": time_consistency,
+        "scenario_sensitivity": scenario_sensitivity,
         "restriction_vs_products_r_gt_0": products_check,
         "restriction_vs_products_r_eq_0": products_check_r_zero,
         "restriction_suboptimal_when_r_positive": bool(
